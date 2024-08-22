@@ -1,10 +1,15 @@
 import 'package:calendar_timeline/calendar_timeline.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
+import 'package:to_do/firebase_functions.dart';
+import 'package:to_do/login/login.dart';
+import 'package:to_do/providers/my_provider.dart';
 import 'package:to_do/tabs/settings.dart';
 import 'package:to_do/tabs/tasks.dart';
 
-import 'add task_bottom sheet.dart';
+import 'add_task_bottom_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String routName = "Home";
@@ -19,15 +24,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var provider=Provider.of<MyProvider>(context);
+     //String label=ModalRoute.of(context)?.settings.arguments as String;
     return Scaffold(
       extendBody: true,
       backgroundColor: Color(0xffDFECDB),
       appBar: AppBar(
         backgroundColor: Colors.blue,
-        title: const Text(
-          "ToDo",
+        title:  Text(
+          "Hello ${provider.userModel?.userName}",
           style: TextStyle(fontSize: 30, color: Colors.white),
         ),
+        actions: [
+         IconButton(onPressed: (){
+           FirebaseAuth.instance.signOut();
+           Navigator.pushNamed(context,LoginScreen.routName);
+
+         },
+             icon: Icon(Icons.logout))
+        ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(

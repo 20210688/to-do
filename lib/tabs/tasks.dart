@@ -1,19 +1,32 @@
 import 'package:calendar_timeline/calendar_timeline.dart';
 import 'package:flutter/material.dart';
+import 'package:to_do/firebase_functions.dart';
 import 'package:to_do/task_item.dart';
 
-class TasksTab extends StatelessWidget {
-  const TasksTab({super.key});
+class TasksTab extends StatefulWidget {
+   TasksTab({super.key});
+
+  @override
+  State<TasksTab> createState() => _TasksTabState();
+}
+
+class _TasksTabState extends State<TasksTab> {
+  DateTime dateTime=DateTime.now();
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
       CalendarTimeline(
-          initialDate:DateTime.now(),
+          initialDate:dateTime,
           firstDate: DateTime.now().subtract(Duration(days: 365)),
           lastDate: DateTime.now().add(Duration(days: 365)),
-          onDateSelected:(data)=>print(data),
+          onDateSelected:(data){
+         dateTime=data;
+         setState(() {
+
+         });
+          },
           leftMargin: 20,
         monthColor: Colors.black,
         dayColor: Colors.blue,
@@ -26,10 +39,34 @@ class TasksTab extends StatelessWidget {
           height:24,
         ),
        Expanded(
-         child: ListView.builder(itemBuilder: (context,index){
-           return TaskItem();
-         },
-           itemCount: 60,
+         child: StreamBuilder(
+           stream:FirebaseFunctions.getTasks(dateTime) ,
+           builder:(context,snapshot){
+             if(snapshot.connectionState==ConnectionState.waiting){
+               return Center(child: CircularProgressIndicator());
+             }
+             if(snapshot.hasError){
+               return Column(
+                 children: [
+                   Text("something went wrong"),
+                   ElevatedButton(onPressed: (){
+
+                   }, child: Text("try again")
+                   ),
+                 ],
+               );
+             }
+             var tasks=snapshot.data?.docs.map((doc) => doc.data()).toList();
+             if(tasks?.isEmpty??true){
+               return Text("No Tasks");
+             }
+             return ListView.builder(itemBuilder: (context,index){
+               return TaskItem(model: tasks[index],);
+             },
+               itemCount: tasks!.length,
+             );
+
+           },
          ),
        )
       ],
