@@ -8,5 +8,6 @@ class SettingsTab extends StatelessWidget {
     return Container(
       color: Colors.purple,
     );
+
   }
 }
